@@ -6,8 +6,7 @@ library(dplyr)
 library(lubridate)
 library(scales)
 
-### Modificando o banco de dados 
-
+### Modificando o banco de dados mutate
 
 vendas$`Product Name` <- as.factor(vendas$`Product Name`)
 vendas$Category <- as.factor(vendas$Category)
@@ -49,15 +48,16 @@ theme_estat <- function(...){
       scale_fill_manual( values = cores_estat ),
       scale_colour_manual( values = cores_estat )))}
 
-# Instale e carregue o pacote DBI e o pacote de conexão específico
-# Neste exemplo, usaremos o pacote RSQLite para SQLite
+
 install.packages("DBI")
 install.packages("RSQLite")
 library(DBI)
 library(RSQLite)
 
-###### ACHAR UM JEITO DE TIRAR AS LINHAS DUPLICADAS 
-
+#### Retirando as linhas com ID unicas que estão duplicadas
+duplicated(vendas$ID_unica)
+which(duplicated(vendas$ID_unica))
+vendas <- vendas[!duplicated(vendas$ID_unica),]
 ### Faturamento anual por categoria
 # calcular o farturamento bruto (soma)
 # calcular as porcentagem em relação ao faturamento total 
@@ -86,20 +86,10 @@ ggplot(tabelax, aes(fct_reorder(Categoria, -Preco), Preco, label = scales::perce
   xlab("Categoria")+
   ylab("Faturamento Anual")+
   ggtitle("Gráfico de barras do faturamento anual por categoria") + 
+  geom_text(position = position_dodge(width = .9),
+            vjust = -0.5, hjust = .5,
+            size = 3)  +
   theme_estat() +
   theme(legend.title = element_blank())
 
 
-vendas$Preco <- as.character(vendas$Preco)
-vendas %>% 
-  summarise(Preco = sum(Preco))
-
-
-
-ggplot(tabelax, aes(fct_reorder(Categoria,-Preco),Preco)) +
-  geom_bar(stat = "identity", fill = c("#A11D21", "#003366", "#CC9900")) +
-  xlab("Categoria")+
-  ylab("Faturamento Anual")+
-  ggtitle("Gráfico de barras do faturamento anual por categoria") + 
-  theme_estat() +
-  theme(legend.title = element_blank())
