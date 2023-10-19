@@ -63,54 +63,30 @@ vendas <- vendas[!duplicated(vendas$ID_unica),]
 
 ### Faturamento anual por categoria
 
-## Gráfico de colunas do faturamento anual por categoria
-tabela1 <- vendas %>%
-  filter(!is.na(Preco)) %>%
-  filter(!is.na(Categoria)) %>%
-  select(Preco, Categoria) %>% 
-  group_by(Categoria) %>% 
-  summarise(Preco = sum(Preco)) %>% 
-  mutate(freq = Preco / sum(Preco)) %>%
-  mutate(
-    freq = scales::percent(freq, scale = 100, accuracy = 0.01),
-    freq = gsub("\\.", ",", freq) %>% paste( sep = ""),
-    label = str_c(Preco, " (", freq, ")") %>% str_squish()
-  )
+
+## gráfico de linhas 
+vendas1 <- vendas %>% 
+  group_by(mes = month(`Data Venda`))
+
+vendas1$mes <- as.factor(vendas1$mes)
+levels(vendas1$mes)  
+levels(vendas1$mes) <- c("Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro")
+
+tabela1 <- vendas1 %>% 
+  filter(!is.na(mes)) %>% 
+  filter(!is.na(Categoria)) %>% 
+  filter(!is.na(Preco)) %>% 
+  select(Preco, Categoria, mes) %>% 
+  group_by(mes, Categoria) %>% 
+  summarise(Preco = sum(Preco))
 
 ggplot(tabela1) +
-  aes(x = fct_reorder(Categoria, Preco, .desc = TRUE), y = Preco, label = label) +
-  geom_bar(stat = "identity", fill = c("#003366","#A11D21", "#CC9900"), width = 0.7) +
-  geom_text(
-    position = position_dodge(width = 0.9),
-    vjust = -0.5,
-    size = 3
-  ) + 
-  labs(x = "Categoria", y = "Faturamento anual")
-ggsave(filename = file.path(caminho_Leticia, "faturamento-colunas-freq.pdf"), width = 158, height = 93, units = "mm")
-
-
-## Gráfico de setores do faturamento anual por categoria
-tabela2 <- vendas %>% 
-  filter(!is.na(Preco)) %>%
-  filter(!is.na(Categoria)) %>%
-  select(Preco, Categoria) %>% 
-  group_by(Categoria) %>% 
-  summarise(Preco = sum(Preco)) %>% 
-  mutate(freq = round(100*(Preco / sum(Preco)), 2)) %>%
-  arrange(desc(Categoria)) %>%
-  mutate(posicao = cumsum(freq) - 0.5*freq)
-
-ggplot(tabela2) +
-  aes(x = factor(""), y = freq , fill = factor(Categoria)) +
-  geom_bar(width = 1, stat = "identity") +
-  coord_polar(theta = "y") +
-  geom_text(
-    aes(x = 1.8, y = posicao, label = paste0(freq, "%")),
-    color = "black"
-  ) +
-  theme_void() +
-  theme(legend.position = "top") +
-  scale_fill_manual(values = cores_estat, name = 'Categoria')
-ggsave(filename = file.path(caminho_Leticia, "faturamento-setores-freq.pdf"), width = 158, height = 93, units = "mm")
+  aes(x = mes, y = Preco, group = Categoria, colour = Categoria) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  scale_colour_manual(name = "Produto", labels = c("A", "B")) +
+  labs(x = "Ano", y = "Preço") +
+  theme_estat()
+ggsave(filename = file.path(caminho_Leticia, "faturamento-linhas.pdf"), width = 158, height = 93, units = "mm")
 
 
