@@ -90,3 +90,35 @@ ggplot(tabela1) +
 ggsave(filename = file.path(caminho_Leticia, "faturamento-linhas.pdf"), width = 158, height = 93, units = "mm")
 
 
+### Variação do preço por marca
+
+## Gráfico boxplot
+vendas %>% 
+  na.omit() %>% 
+  ggplot() +
+  aes(x = Marca, y = Preco) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Marca", y = "Variação do Preço em Reais") +
+  theme_estat()
+ggsave(filename = file.path(caminho_Leticia, "variação-preco-boxplot.pdf"), width = 158, height = 93, units = "mm")
+
+## Medidas resumo adidas
+quadro_resumo <- vendas %>%
+  group_by(Marca) %>% 
+  na.omit() %>% # caso mais de uma categoria
+  summarize( Média = round (mean(Preco),2),
+             `Desvio Padrão ` = round (sd(Preco),2),
+             `Mínimo ` = round (min(Preco),2),
+             `1º Quartil ` = round ( quantile (Preco, probs = .25),2),
+             Mediana = round ( quantile (Preco, probs = .5),2),
+             `3º Quartil ` = round ( quantile (Preco, probs = .75),2),
+             `Máximo ` = round (max(Preco),2)) %>% t() %>% as.data.frame() %>%
+  mutate(V1 = str_replace(V1,"\\.",","))
+quadro_resumo
+
+
+
+
