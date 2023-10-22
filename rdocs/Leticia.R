@@ -105,20 +105,16 @@ vendas %>%
   theme_estat()
 ggsave(filename = file.path(caminho_Leticia, "variação-preco-boxplot.pdf"), width = 158, height = 93, units = "mm")
 
-## Medidas resumo adidas
+## Medidas resumo 
 quadro_resumo <- vendas %>%
   group_by(Marca) %>% 
   na.omit() %>% # caso mais de uma categoria
   summarize( Média = round (mean(Preco),2),
-             `Desvio Padrão ` = round (sd(Preco),2),
-             `Mínimo ` = round (min(Preco),2),
-             `1º Quartil ` = round ( quantile (Preco, probs = .25),2),
-             Mediana = round ( quantile (Preco, probs = .5),2),
-             `3º Quartil ` = round ( quantile (Preco, probs = .75),2),
-             `Máximo ` = round (max(Preco),2)) %>% t() %>% as.data.frame() %>%
+                 `Desvio Padrão ` = round (sd(Preco),2),
+                 `Mínimo ` = round (min(Preco),2),
+                 `1º Quartil ` = round ( quantile (Preco, probs = .25),2),
+                  Mediana = round ( quantile (Preco, probs = .5),2),
+                 `3º Quartil ` = round ( quantile (Preco, probs = .75),2),
+                 `Máximo ` = round (max(Preco),2)) %>% t() %>% as.data.frame() %>%
   mutate(V1 = str_replace(V1,"\\.",","))
 quadro_resumo
-
-
-
-
