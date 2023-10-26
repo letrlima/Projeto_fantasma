@@ -1,7 +1,7 @@
 vendas <- read_csv("banco/vendas.csv")
 devolução <- read_csv("banco/devolução.csv")
 caminho_Leticia <- "resultados"
-teste <- "teste"
+devolução_atualizado <- read_csv("C:/Users/letic/Desktop/ESTAT/devolução_atualizado.csv")
 
 library(tidyverse)
 library(dplyr)
@@ -108,7 +108,7 @@ ggsave(filename = file.path(caminho_Leticia, "variação-preco-boxplot.pdf"), wi
 ## Medidas resumo 
 quadro_resumo <- vendas %>%
   group_by(Marca) %>% 
-  na.omit() %>% # caso mais de uma categoria
+  na.omit() %>% 
   summarize( Média = round (mean(Preco),2),
                  `Desvio Padrão ` = round (sd(Preco),2),
                  `Mínimo ` = round (min(Preco),2),
@@ -118,3 +118,39 @@ quadro_resumo <- vendas %>%
                  `Máximo ` = round (max(Preco),2)) %>% t() %>% as.data.frame() %>%
   mutate(V1 = str_replace(V1,"\\.",","))
 quadro_resumo
+
+### Relação entre categoria (feminino e masculino) e cor 
+tab <- vendas %>%
+  mutate(Categoria = case_when(
+    Categoria %>% str_detect("Moda Feminina") ~ "Moda Feminina",
+    Categoria %>% str_detect("Moda Masculina") ~ "Moda Masculina"
+  )) %>%
+  filter(!is.na(Categoria)) %>% 
+  filter(!is.na(Cor)) %>% 
+  group_by(Categoria, Cor) %>%
+  summarise(freq = n()) %>%
+  mutate(
+    freq_relativa = scales::percent(freq / sum(freq), scale = 100, accuracy = 0.01, labels = percent_format(scale = 100))
+  )
+
+porcentagens <- str_c(tab$freq_relativa, "%") %>% str_replace("\\.", ",")
+
+legendas <- str_squish(str_c(tab$freq, " (", porcentagens, ")"))
+
+ggplot(tab) +
+  aes(
+    x = fct_reorder(Categoria, freq, .desc = T), y = freq,
+    fill = Cor, label = legendas
+  ) +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) +
+  labs(x = "Categoria", y = "Frequência") +
+  theme_estat()
+ggsave(filename = file.path(caminho_Leticia, "Categoria-cor-colunas-bivariado.pdf"), width = 158, height = 93, units = "mm")
+
+## Tabela 
+# Frequências e informações extraídos do gráfico 
