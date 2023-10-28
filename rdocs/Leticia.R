@@ -1,5 +1,4 @@
 vendas <- read_csv("banco/vendas.csv")
-devolução <- read_csv("banco/devolução.csv")
 caminho_Leticia <- "resultados"
 devolução_atualizado <- read_csv("C:/Users/letic/Desktop/ESTAT/devolução_atualizado.csv")
 
@@ -70,7 +69,7 @@ vendas1 <- vendas %>%
 
 vendas1$mes <- as.factor(vendas1$mes)
 levels(vendas1$mes)  
-levels(vendas1$mes) <- c("Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro")
+levels(vendas1$mes) <- c("Jan", "Fev", "Mar", "Abr", "Maio", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
 
 tabela1 <- vendas1 %>% 
   filter(!is.na(mes)) %>% 
@@ -94,9 +93,10 @@ ggsave(filename = file.path(caminho_Leticia, "faturamento-linhas.pdf"), width = 
 
 ## Gráfico boxplot
 vendas %>% 
-  na.omit() %>% 
+  filter(!is.na(Marca)) %>% 
+  filter(!is.na(Preco)) %>% 
   ggplot() +
-  aes(x = Marca, y = Preco) +
+  aes(reorder(Marca, Preco, median), Preco)+
   geom_boxplot(fill = c("#A11D21"), width = 0.5) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
@@ -108,7 +108,8 @@ ggsave(filename = file.path(caminho_Leticia, "variação-preco-boxplot.pdf"), wi
 ## Medidas resumo 
 quadro_resumo <- vendas %>%
   group_by(Marca) %>% 
-  na.omit() %>% 
+  filter(!is.na(Marca)) %>% 
+  filter(!is.na(Preco)) %>%  
   summarize( Média = round (mean(Preco),2),
                  `Desvio Padrão ` = round (sd(Preco),2),
                  `Mínimo ` = round (min(Preco),2),
@@ -152,5 +153,18 @@ ggplot(tab) +
   theme_estat()
 ggsave(filename = file.path(caminho_Leticia, "Categoria-cor-colunas-bivariado.pdf"), width = 158, height = 93, units = "mm")
 
-## Tabela 
-# Frequências e informações extraídos do gráfico 
+## Tabela de contingência 
+conting <- as.table(rbind(c(40, 55, 54, 51, 59, 64) , c(52, 55, 49, 46, 65, 45)))
+dimnames(conting) <- list(gender = c("Feminino", "Masculino"),
+                    party = c("Preto","Azul", "Verde", "Vermelho", "Branco", "Amarelo"))
+(tabela2 <- chisq.test(conting))
+#qui quadrado
+qui <- chisq.test(conting)
+#valores observados e esperados 
+tabela2$observed
+tabela2$expected 
+x = 5.479
+#coeficiente de contingência corrigido 
+c <- sqrt(x/(x+639))
+cmax <- sqrt((2-1)/2)
+corrigido <- c/cmax
