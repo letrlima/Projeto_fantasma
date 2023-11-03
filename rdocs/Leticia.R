@@ -84,7 +84,7 @@ ggplot(tabela1) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   scale_colour_manual(name = "Produto", labels = c("A", "B")) +
-  labs(x = "Ano", y = "Preço") +
+  labs(x = "Ano", y = "Preço em Reais") +
   theme_estat()
 ggsave(filename = file.path(caminho_Leticia, "faturamento-linhas.pdf"), width = 158, height = 93, units = "mm")
 
@@ -138,6 +138,7 @@ porcentagens <- str_c(tab$freq_relativa, "%") %>% str_replace("\\.", ",")
 
 legendas <- str_squish(str_c(tab$freq, " (", porcentagens, ")"))
 
+# Gráfico de colunas
 ggplot(tab) +
   aes(
     x = fct_reorder(Categoria, freq, .desc = T), y = freq,
@@ -168,3 +169,25 @@ x = 5.479
 c <- sqrt(x/(x+639))
 cmax <- sqrt((2-1)/2)
 corrigido <- c/cmax
+corrigido
+
+### Relação entre preço e avaliação
+
+# Gráfico de dispersão
+ggplot(vendas) +
+  aes(x = Preco, y = Nota) +
+  geom_point(colour = "#A11D21", size = 3) +
+  labs(
+    x = "Preço dos Produtos em Reais",
+    y = "Avaliação dos Produtos"
+  ) +
+  theme_estat()
+ggsave(filename = file.path(caminho_Leticia, "preco-avaliação-dispersão.pdf"), width = 158, height = 93, units = "mm")
+
+# Cálculos de correlação
+vendas3 <- vendas %>% 
+  filter(!is.na(Preco)) %>% 
+  filter(!is.na(Nota)) 
+
+cor(vendas3$Preco, vendas3$Nota, method = "pearson")
+cor(vendas3$Preco, vendas3$Nota, method = "spearman")
