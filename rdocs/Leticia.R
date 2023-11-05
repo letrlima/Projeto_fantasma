@@ -128,7 +128,7 @@ tab <- vendas %>%
   )) %>%
   filter(!is.na(Categoria)) %>% 
   filter(!is.na(Cor)) %>% 
-  group_by(Categoria, Cor) %>%
+  group_by(Cor, Categoria) %>%
   summarise(freq = n()) %>%
   mutate(
     freq_relativa = scales::percent(freq / sum(freq), scale = 100, accuracy = 0.01, labels = percent_format(scale = 100))
@@ -150,7 +150,9 @@ ggplot(tab) +
     vjust = -0.5, hjust = 0.5,
     size = 3
   ) +
-  labs(x = "Categoria", y = "Frequência") +
+  labs(x = "Cor", y = "Frequência") +
+  scale_y_continuous(limits = c(0, 70))+
+  facet_wrap(~Cor)+
   theme_estat()
 ggsave(filename = file.path(caminho_Leticia, "Categoria-cor-colunas-bivariado.pdf"), width = 158, height = 93, units = "mm")
 
