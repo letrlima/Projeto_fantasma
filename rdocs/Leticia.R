@@ -142,7 +142,7 @@ legendas <- str_squish(str_c(tab$freq, " (", porcentagens, ")"))
 ggplot(tab) +
   aes(
     x = fct_reorder(Categoria, freq, .desc = T), y = freq,
-    fill = Cor, label = legendas
+    fill = Categoria, label = legendas
   ) +
   geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
   geom_text(
@@ -193,3 +193,6 @@ vendas3 <- vendas %>%
 
 cor(vendas3$Preco, vendas3$Nota, method = "pearson")
 cor(vendas3$Preco, vendas3$Nota, method = "spearman")
+
+
+### Frequência de cada tipo de devolução por marca
