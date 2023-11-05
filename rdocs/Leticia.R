@@ -151,9 +151,12 @@ ggplot(tab) +
     size = 3
   ) +
   labs(x = "Cor", y = "Frequência") +
-  scale_y_continuous(limits = c(0, 70))+
+  scale_y_continuous(limits = c(0, 75))+
   facet_wrap(~Cor)+
-  theme_estat()
+  theme_estat()+
+  theme(
+    axis.text.x = element_text(size = 8)
+  )
 ggsave(filename = file.path(caminho_Leticia, "Categoria-cor-colunas-bivariado.pdf"), width = 158, height = 93, units = "mm")
 
 ## Tabela de contingência 
