@@ -5,6 +5,7 @@ devolução_atualizado <- read_csv("C:/Users/letic/Desktop/ESTAT/devolução_atu
 library(tidyverse)
 library(dplyr)
 library(lubridate)
+
 library(scales)
 
 ### Modificando o banco de dados
@@ -106,10 +107,10 @@ vendas %>%
 ggsave(filename = file.path(caminho_Leticia, "variação-preco-boxplot.pdf"), width = 158, height = 93, units = "mm")
 
 ## Medidas resumo 
-quadro_resumo <- vendas %>%
-  group_by(Marca) %>% 
+quadro_resumo <- vendas%>%
   filter(!is.na(Marca)) %>% 
   filter(!is.na(Preco)) %>%  
+  group_by(Marca) %>% 
   summarize( Média = round (mean(Preco),2),
                  `Desvio Padrão ` = round (sd(Preco),2),
                  `Mínimo ` = round (min(Preco),2),
@@ -197,5 +198,44 @@ vendas3 <- vendas %>%
 cor(vendas3$Preco, vendas3$Nota, method = "pearson")
 cor(vendas3$Preco, vendas3$Nota, method = "spearman")
 
-
+# junção dos bancos (vendas e devolução)
+colnames(devolução_atualizado)[2]<-'ID_unica'
+vendas <- left_join(vendas, devolução_atualizado, by = "ID_unica")
+colnames(vendas)[17]<-'Motivo de Devolução'
 ### Frequência de cada tipo de devolução por marca
+freq_devolucao <- vendas %>%
+  mutate(`Motivo de Devolução` = case_when(
+    `Motivo de Devolução` %>% str_detect("Produto com defeito") ~ "Produto com \n defeito",
+    `Motivo de Devolução` %>% str_detect("Arrependimento") ~ "Arrependimento",
+    `Motivo de Devolução` %>% str_detect("Não informado") ~ "Não \n informado"
+  )) %>%
+  filter(!is.na(`Motivo de Devolução`)) %>% 
+  filter(!is.na(Marca)) %>% 
+  group_by( `Motivo de Devolução`, Marca) %>%
+  summarise(freq = n()) %>%
+  mutate(
+    freq_relativa = scales::percent(freq / sum(freq), scale = 100, accuracy = 0.01, labels = percent_format(scale = 100))
+  )
+
+porcentagens <- str_c(freq_devolucao$freq_relativa) %>% str_replace("\\.", ",")
+
+legendas <- str_squish(str_c(freq_devolucao$freq, " (", porcentagens, ")"))
+
+ggplot(freq_devolucao) +
+  aes(
+    x = fct_reorder(Marca, freq, .desc = T), y = freq,
+    fill = `Motivo de Devolução`, label = legendas
+  ) +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = 0.3, hjust = - 0.2,
+    size = 3
+  ) +
+  labs(x = "Frequência", y = "Cor") +
+  scale_y_continuous(limits = c(0, 45))+
+  coord_flip()+
+  theme_estat()+
+  theme(
+    axis.text.x = element_text(size = 6))
+ggsave(filename = file.path(caminho_Leticia, "devolução-por-marca-bivariado.pdf"), width = 158, height = 93, units = "mm")
