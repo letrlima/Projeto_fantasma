@@ -232,10 +232,26 @@ ggplot(freq_devolucao) +
     vjust = 0.3, hjust = - 0.2,
     size = 3
   ) +
-  labs(x = "Frequência", y = "Cor") +
+  labs(x = "Marca", y = "Frequência") +
   scale_y_continuous(limits = c(0, 45))+
   coord_flip()+
   theme_estat()+
   theme(
     axis.text.x = element_text(size = 6))
 ggsave(filename = file.path(caminho_Leticia, "devolução-por-marca-bivariado.pdf"), width = 158, height = 93, units = "mm")
+# tabela de contingencia 
+conting1 <- as.table(rbind(c(28, 21, 23, 25, 17) , c(15, 21, 27, 19, 29), c(21, 20, 20, 24, 37)))
+dimnames(conting1) <- list(gender = c("Defeito", "Não informado", "Arrependimento"),
+                           party = c("H&M","Gucci", "Zara", "Adidas", "Nike"))
+(tabela89<- chisq.test(conting1))
+#qui quadrado
+qui1 <- chisq.test(conting1)
+#valores observados e esperados 
+tabela89$observed
+tabela89$expected 
+x1 = 12.778
+#coeficiente de contingência corrigido 
+c1 <- sqrt(x1/(x1+347))
+cmax1 <- sqrt((3-1)/3)
+corrigido1 <- c1/cmax1
+corrigido1
