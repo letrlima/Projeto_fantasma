@@ -255,3 +255,24 @@ c1 <- sqrt(x1/(x1+347))
 cmax1 <- sqrt((3-1)/3)
 corrigido1 <- c1/cmax1
 corrigido1
+
+
+### Avaliação média por marca 
+
+dados <- vendas %>% 
+  select(Marca, Nota) %>% 
+  filter(!is.na(Marca)) %>% 
+  filter(!is.na(Nota))
+dados
+
+media_por_marca <- aggregate(Nota ~ Marca, data = dados, mean)
+
+ggplot(media_por_marca, aes(x = Marca, y = Nota, fill = Marca)) +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(aes(label = round(Nota, 2)), position = position_dodge(width = .9),
+            vjust = -0.5, hjust = 0.5,
+            size = 3) + 
+  labs(x = "Marcas", y = "Avaliação Média") +
+  scale_y_continuous(limits = c(0, 3))+
+  theme_estat()
+ggsave("colunas-bi-avmedia-marca.pdf", width = 158, height = 93, units = "mm")
