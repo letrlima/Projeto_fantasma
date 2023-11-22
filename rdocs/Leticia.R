@@ -274,5 +274,8 @@ ggplot(media_por_marca, aes(x = Marca, y = Nota, fill = Marca)) +
             size = 3) + 
   labs(x = "Marcas", y = "Avaliação Média") +
   scale_y_continuous(limits = c(0, 3))+
+  guides(fill = "none") +
   theme_estat()
-ggsave("colunas-bi-avmedia-marca.pdf", width = 158, height = 93, units = "mm")
+ggsave (filename= file.path(caminho_Leticia,"colunas-bi-avmedia-marca.pdf", width = 158, height = 93, units = "mm"))
+
+
